@@ -21,6 +21,13 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#ifdef WIN32
+#include <direct.h>
+#define chdir _chdir
+#else
+#include <unistd.h>
+#define MAX_PATH PATH_MAX
+#endif
 
 /* prefix for open functions in C libraries */
 #define LUA_POF		"luaopen_"
@@ -623,9 +630,49 @@ static const luaL_Reg ll_funcs[] = {
 static const lua_CFunction loaders[] =
   {loader_preload, loader_Lua, loader_C, loader_Croot, NULL};
 
+static const char* getrootpath(char* path, int len) {
+#ifdef WIN32
+    GetModuleFileNameA(0, path, len);
+    char* p = strrchr(path, '\\');
+    *(p+1) = '\0';
+    return path;
+#elif __APPLE__
+
+    uint32_t size = len;
+    int nRet = _NSGetExecutablePath(path, &size);
+
+    if (nRet != 0) {
+        return "./";
+    }
+
+    char* p = strrchr(path, '/');
+    *(p + 1) = '\0';
+    return path;
+#else
+    int nRet = readlink("/proc/self/exe", path, MAX_PATH);
+
+    if (nRet < 0 || nRet >= MAX_PATH) {
+        return "./";
+    }
+
+    char* p = strrchr(path, '/');
+    *(p + 1) = '\0';
+    return path;
+#endif
+}
 
 LUALIB_API int luaopen_package (lua_State *L) {
+  char path[2*MAX_PATH + 1];
+  char root[MAX_PATH + 1];
+
   int i;
+
+  strcpy(path, LUA_PATH_DEFAULT);
+  strcat(path, ";");
+  getrootpath(root, MAX_PATH);
+  chdir(root);
+  strcat(path, root);
+  strcat(path, "?.lua");
   /* create new type _LOADLIB */
   luaL_newmetatable(L, "_LOADLIB");
   lua_pushcfunction(L, gctm);
@@ -646,7 +693,7 @@ LUALIB_API int luaopen_package (lua_State *L) {
     lua_rawseti(L, -2, i+1);
   }
   lua_setfield(L, -2, "loaders");  /* put it in field `loaders' */
-  setpath(L, "path", LUA_PATH, LUA_PATH_DEFAULT);  /* set field `path' */
+  setpath(L, "path", LUA_PATH, path);  /* set field `path' */
   setpath(L, "cpath", LUA_CPATH, LUA_CPATH_DEFAULT); /* set field `cpath' */
   /* store config information */
   lua_pushliteral(L, LUA_DIRSEP "\n" LUA_PATHSEP "\n" LUA_PATH_MARK "\n"

@@ -89,7 +89,9 @@
 #define LUA_CDIR	"!\\"
 #define LUA_PATH_DEFAULT  \
 		".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
-		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
+		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua;" \
+        ".\\?\\init.lua;" "!\\..\\?.lua;" ".\\..\\script\\?.lua" \
+
 #define LUA_CPATH_DEFAULT \
 	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
 
@@ -99,7 +101,9 @@
 #define LUA_CDIR	LUA_ROOT "lib/lua/5.1/"
 #define LUA_PATH_DEFAULT  \
 		"./?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?/init.lua;" \
-		            LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua"
+		            LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua;" \
+        "./?/init.lua;" "!/../?.lua;" "./../script/?.lua" \
+
 #define LUA_CPATH_DEFAULT \
 	"./?.so;"  LUA_CDIR"?.so;" LUA_CDIR"loadall.so"
 #endif
