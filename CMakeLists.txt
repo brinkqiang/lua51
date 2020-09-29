@@ -68,7 +68,7 @@ ELSEIF (UNIX)
 ENDIF ()
 
 INSTALL(DIRECTORY include/
-    DESTINATION include/lua
+    DESTINATION include
     FILES_MATCHING PATTERN "*.h")
 
     
