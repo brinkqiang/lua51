@@ -71,7 +71,6 @@ INSTALL(DIRECTORY include/
     DESTINATION include
     FILES_MATCHING PATTERN "*.h")
 
-    
 IF (WIN32)
     INSTALL(TARGETS lua lua51
         RUNTIME DESTINATION bin
